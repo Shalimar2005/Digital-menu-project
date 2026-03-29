@@ -1,0 +1,8 @@
+{
+  "name": "Opalite Dining",
+  "description": "A premium, AI-powered restaurant menu and ordering system with real-time KDS and smart pairings.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

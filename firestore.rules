@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: dishes
+    // Fields: name, price, ingredients, category, subcategory, pairing_tag, imageUrl, timestamp
+    //
+    // Collection: orders
+    // Fields: tableId, items, status, timestamp, totalAmount
+    //
+    // Collection: users
+    // Fields: email, role
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          request.auth.token.email == "kathadeshalimar@gmail.com" ||
+          request.auth.token.email == "hopeangle29004@gmail.com" ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+        );
+    }
+
+    function isManager() {
+      return isAuthenticated() &&
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')) ||
+          isAdmin()
+        );
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /dishes/{dishId} {
+      allow read: if true;
+      allow write: if isManager();
+    }
+
+    match /test_connection/{id} {
+      allow write: if isManager();
+    }
+
+    match /orders/{orderId} {
+      allow read: if isManager(); // Only staff can see all orders
+      allow create: if true; // Customers can place orders
+      allow update: if isManager(); // Staff updates status
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+  }
+}

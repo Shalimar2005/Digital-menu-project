@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "Dish": {
+      "title": "Dish",
+      "description": "A menu item",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the dish" },
+        "price": { "type": "number", "description": "Price in USD" },
+        "ingredients": { "type": "string", "description": "List of ingredients" },
+        "category": { "type": "string", "enum": ["Sunday Offers", "Bar Menu", "Cocktails & Mocktails", "Classic Food Menu"], "description": "Menu category" },
+        "pairing_tag": { "type": "string", "description": "Tag for AI pairing logic" },
+        "imageUrl": { "type": "string", "description": "URL to dish image" },
+        "isSushi": { "type": "boolean", "description": "Flag for collapsible sushi section" }
+      },
+      "required": ["name", "price", "category"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order",
+      "type": "object",
+      "properties": {
+        "tableId": { "type": "string", "description": "Table number" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dishId": { "type": "string" },
+              "name": { "type": "string" },
+              "price": { "type": "number" },
+              "quantity": { "type": "number" }
+            }
+          }
+        },
+        "status": { "type": "string", "enum": ["pending", "cooking", "served"], "description": "Order status" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "totalAmount": { "type": "number" }
+      },
+      "required": ["tableId", "items", "status", "timestamp"]
+    },
+    "User": {
+      "title": "User",
+      "description": "App user (manager/admin)",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "manager"] }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/dishes/{dishId}": {
+      "schema": "Dish",
+      "description": "Menu items"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Manager/Admin users"
+    }
+  }
+}

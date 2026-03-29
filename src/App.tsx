@@ -6,6 +6,7 @@ import MenuPage from './components/MenuPage';
 import ManagerDashboard from './components/ManagerDashboard';
 import AdminLogin from './components/AdminLogin';
 import { motion, AnimatePresence } from 'motion/react';
+ import { Navigate } from "react-router-dom"; 
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
@@ -34,15 +35,19 @@ export default function App() {
   }
 
   return (
-    <Router>
-      <AnimatePresence mode="wait">
-        <Routes>
-          <Route path="/" element={<MenuPage />} />
-          <Route path="/menu" element={<MenuPage />} />
-          <Route path="/admin" element={user ? <ManagerDashboard /> : <AdminLogin />} />
-        </Routes>
-      </AnimatePresence>
-    </Router>
-  );
+    <Routes>
+      <Route path="/" element={<MenuPage />} />
+      <Route path="/menu" element={<MenuPage />} />
+
+
+      <Route path="/admin-login" element={<AdminLogin />} />
+
+
+      <Route
+        path="/admin"
+        element={user ? <ManagerDashboard /> : <Navigate to="/admin-login" />}
+      />
+    </Routes>
+  )
 }
 

@@ -234,52 +234,48 @@ export default function MenuPage() {
         )}
       </AnimatePresence>
       {isCartOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="bg-[#111] p-6 rounded-2xl w-96 text-white">
-
-            <h2 className="text-xl mb-4 font-semibold">Your Cart</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#111] border border-white/10 p-6 rounded-3xl w-full max-w-sm text-white"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-serif italic">Your Order</h2>
+              <button onClick={() => setIsCartOpen(false)} className="text-white/40 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
 
             {Object.keys(cart).length === 0 ? (
-              <p className="text-sm text-white/50">Cart is empty</p>
+              <div className="text-center py-8">
+                <p className="text-sm text-white/40">Your cart is currently empty</p>
+              </div>
             ) : (
               <>
-                <ul className="space-y-3 max-h-60 overflow-y-auto">
+                <ul className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                   {Object.entries(cart).map(([id, qty]) => {
                     const item = dishes.find(d => d.id === id);
-                    if (!item) return null;
+                    if (!item || qty === 0) return null;
 
                     return (
-                      <li key={id} className="flex justify-between items-center bg-white/5 p-3 rounded-lg">
-
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-xs text-white/40">₹{item.price} × {qty}</p>
+                      <li key={id} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                        <div className="flex-grow">
+                          <p className="font-medium text-sm">{item.name}</p>
+                          <p className="text-[10px] text-white/40 uppercase tracking-wider">₹{item.price} per unit</p>
                         </div>
 
-                        {/* 🔥 EDIT BUTTONS */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3 bg-black/40 rounded-lg p-1 border border-white/10">
                           <button
-                            onClick={() =>
-                              setCart(prev => ({
-                                ...prev,
-                                [id]: Math.max((prev[id] || 1) - 1, 0)
-                              }))
-                            }
-                            className="px-2 bg-white/10 rounded"
+                            onClick={() => setCart(prev => ({ ...prev, [id]: Math.max(prev[id] - 1, 0) }))}
+                            className="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition-colors"
                           >
                             -
                           </button>
-
-                          <span>{qty}</span>
-
+                          <span className="text-xs font-mono w-4 text-center">{qty}</span>
                           <button
-                            onClick={() =>
-                              setCart(prev => ({
-                                ...prev,
-                                [id]: (prev[id] || 0) + 1
-                              }))
-                            }
-                            className="px-2 bg-white/10 rounded"
+                            onClick={() => setCart(prev => ({ ...prev, [id]: prev[id] + 1 }))}
+                            className="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition-colors"
                           >
                             +
                           </button>
@@ -289,30 +285,82 @@ export default function MenuPage() {
                   })}
                 </ul>
 
-                {/* 💰 TOTAL */}
-                <div className="mt-4 border-t border-white/10 pt-4 flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span>
-                    ₹
-                    {Object.entries(cart).reduce((total, [id, qty]) => {
-                      const item = dishes.find(d => d.id === id);
-                      return total + (item ? item.price * qty : 0);
-                    }, 0)}
-                  </span>
+                <div className="mt-6 pt-4 border-t border-white/10">
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-white/40 text-sm">Total Amount</span>
+                    <span className="text-xl font-mono font-semibold">
+                      ₹{Object.entries(cart).reduce((total, [id, qty]) => {
+                        const item = dishes.find(d => d.id === id);
+                        return total + (item ? item.price * qty : 0);
+                      }, 0)}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const orderItems = Object.entries(cart)
+                            .filter(([_, qty]) => qty > 0)
+                            .map(([id, quantity]) => {
+                              const dish = dishes.find(d => d.id === id);
+                              if (!dish) return null;
+
+                              return {
+                                dishId: id,
+                                name: dish.name,
+                                price: dish.price,
+                                quantity
+                              };
+                            })
+                            .filter(Boolean);
+
+                          const totalAmount = Object.entries(cart).reduce((total, [id, qty]) => {
+                            const item = dishes.find(d => d.id === id);
+                            return total + (item ? item.price * qty : 0);
+                          }, 0);
+
+                          await addDoc(collection(db, 'orders'), {
+                            tableId,
+                            items: orderItems,
+                            status: 'pending',
+                            timestamp: serverTimestamp(),
+                            totalAmount: totalAmount
+                          });
+
+
+                          console.log("Order sent:", {
+                            tableId,
+                            items: orderItems,
+                            totalAmount
+                          });
+
+                          setCart({});
+                          setIsCartOpen(false);
+                          alert('Order placed successfully!');
+                        } catch (error) {
+                          console.error("Error placing order: ", error);
+                          alert('Failed to place order.');
+                        }
+                      }}
+                      className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-white/90 transition-colors"
+                    >
+                      Place Order
+                    </button>
+
+                    <button
+                      onClick={() => setIsCartOpen(false)}
+                      className="w-full text-white/40 text-[10px] uppercase tracking-widest hover:text-white transition-colors py-2"
+                    >
+                      Continue Browsing
+                    </button>
+                  </div>
                 </div>
               </>
             )}
-
-            <button
-              onClick={() => setIsCartOpen(false)}
-              className="mt-4 w-full bg-white text-black py-2 rounded font-semibold"
-            >
-              Close
-            </button>
-          </div>
+          </motion.div>
         </div>
       )}
-
     </div>
   );
 }

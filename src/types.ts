@@ -13,15 +13,19 @@ export interface Dish {
 export const BAR_SUBCATEGORIES = [
   'Coffee',
   'Tea',
-   'Milkshake',
-  'Mocktail',
-  'Beer',
-  'Vodka',
-  'Gin',
-  'Rum',
+  'Milkshake',
   'Wines',
-  'Breezers',
-  'Tequila',
+  'Alcohol',
+  'Soda con',
+  'Other'
+] as const;
+
+export const SNACKS_SUBCATEGORIES = [
+  'Fast Food',
+  'Street Food',
+  'Quick Bites',
+  'Fried',
+  'Grilled',
   'Other'
 ] as const;
 

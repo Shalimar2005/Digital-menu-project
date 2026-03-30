@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Dish, Category, CATEGORIES, BAR_SUBCATEGORIES, FOOD_SUBCATEGORIES } from '../types';
+import { Dish, Category, CATEGORIES, BAR_SUBCATEGORIES, FOOD_SUBCATEGORIES, SNACKS_SUBCATEGORIES } from '../types';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, ShoppingCart, Sparkles, Plus, X, ArrowLeft } from 'lucide-react';
@@ -60,6 +60,8 @@ export default function MenuPage() {
     const q = query(collection(db, 'dishes'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Dish));
+      console.log("🔥 FULL DATA:", items);
+      console.log("🔥 SUBCATEGORIES:", items.map(d => d.subcategory));
       setDishes(items);
     });
     return unsubscribe;
@@ -73,7 +75,21 @@ export default function MenuPage() {
     setCart(prev => ({ ...prev, [dishId]: (prev[dishId] || 0) + 1 }));
 
     const dish = dishes.find(d => d.id === dishId);
-    if (dish && (dish.subcategory === 'Main Course' || dish.subcategory === 'Sushi' || dish.subcategory === 'Appetizers')) {
+    if (dish && [
+      'Main Course',
+      'Sushi',
+      'Appetizers',
+      'Fast Food',
+      'Street Food',
+      'Quick Bites',
+      'Fried',
+      'Grilled',
+      'Other',
+      'Desserts',
+      'Sushi',
+      'Seafood'
+    ].includes(dish.subcategory || '')
+    ) {
       handleShowPairing(dish);
     }
   };
@@ -148,8 +164,15 @@ export default function MenuPage() {
             </button>
             <div className="space-y-12">
               {CATEGORIES.filter(c => !activeCategory || c === activeCategory).map(category => {
-                const categoryDishes = dishes.filter(d => d.category === category);
-                const subCats = category === 'Drinks' ? BAR_SUBCATEGORIES : FOOD_SUBCATEGORIES;
+                const categoryDishes = dishes.filter(
+                  d => d.category?.toLowerCase().trim() === category.toLowerCase().trim()
+                );
+                const subCats =
+                  category === 'Drinks'
+                    ? BAR_SUBCATEGORIES
+                    : category === 'Snacks'
+                      ? SNACKS_SUBCATEGORIES
+                      : FOOD_SUBCATEGORIES;
 
                 return (
                   <div key={category} className="space-y-8">
@@ -159,7 +182,9 @@ export default function MenuPage() {
                     </div>
                     <div className="grid gap-4">
                       {subCats.map(sub => {
-                        const subDishes = categoryDishes.filter(d => d.subcategory === sub);
+                        const subDishes = categoryDishes.filter(
+                          d => d.subcategory?.toLowerCase().trim() === sub.toLowerCase().trim()
+                        );
                         if (subDishes.length === 0) return null;
                         return (
                           <div key={sub} className="border border-white/10 rounded-2xl overflow-hidden">

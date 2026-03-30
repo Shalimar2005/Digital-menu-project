@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy, updateDoc, doc, addDoc, deleteDoc } from 'firebase/firestore';
 import { db, auth, storage } from '../firebase';
-import { Order, Dish, CATEGORIES, Category, BAR_SUBCATEGORIES, FOOD_SUBCATEGORIES } from '../types';
+import { Order, Dish, CATEGORIES, Category, BAR_SUBCATEGORIES, FOOD_SUBCATEGORIES, SNACKS_SUBCATEGORIES } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { LogOut, Plus, Trash2, CheckCircle, Clock, ChefHat, LayoutGrid, ListOrdered, ChevronDown, BarChart3, Users, IndianRupee, TrendingUp, Upload, Loader2, Edit3, QrCode } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
@@ -75,7 +75,7 @@ export default function ManagerDashboard() {
     if (!authReady) return;
 
     const qOrders = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
-    const unsubscribeOrders = onSnapshot(qOrders, 
+    const unsubscribeOrders = onSnapshot(qOrders,
       (snapshot) => {
         setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order)));
       },
@@ -85,7 +85,7 @@ export default function ManagerDashboard() {
     );
 
     const qDishes = query(collection(db, 'dishes'));
-    const unsubscribeDishes = onSnapshot(qDishes, 
+    const unsubscribeDishes = onSnapshot(qDishes,
       (snapshot) => {
         setDishes(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Dish)));
       },
@@ -111,7 +111,7 @@ export default function ManagerDashboard() {
 
   const handleSaveDish = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clean price string (remove ₹, $ and commas)
     const cleanPrice = newDish.price.replace(/[₹$,]/g, '');
     const priceNum = parseFloat(cleanPrice);
@@ -133,7 +133,7 @@ export default function ManagerDashboard() {
       } else {
         await addDoc(collection(db, 'dishes'), dishData);
       }
-      
+
       setIsAddingDish(false);
       setEditingId(null);
       setNewDish({ name: '', price: '', ingredients: '', category: CATEGORIES[0], subcategory: '', pairing_tag: '', imageUrl: '' });
@@ -189,7 +189,7 @@ export default function ManagerDashboard() {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error('Compression timed out')), 15000);
       const reader = new FileReader();
-      
+
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
@@ -326,25 +326,25 @@ export default function ManagerDashboard() {
         <div className="flex items-center gap-8">
           <h1 className="font-serif text-2xl italic">Opal</h1>
           <div className="flex gap-4">
-            <button 
+            <button
               onClick={() => setView('dashboard')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === 'dashboard' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
             >
               <BarChart3 size={16} /> Dashboard
             </button>
-            <button 
+            <button
               onClick={() => setView('kds')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === 'kds' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
             >
               <ListOrdered size={16} /> Orders
             </button>
-            <button 
+            <button
               onClick={() => setView('cms')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === 'cms' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
             >
               <LayoutGrid size={16} /> Menu
             </button>
-            <button 
+            <button
               onClick={() => setView('qr')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${view === 'qr' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
             >
@@ -359,7 +359,7 @@ export default function ManagerDashboard() {
             </p>
             <p className="text-[10px] text-white/30">{user?.email}</p>
           </div>
-          <button 
+          <button
             onClick={() => signOut(auth)}
             className="text-white/40 hover:text-white flex items-center gap-2 text-sm"
           >
@@ -418,14 +418,14 @@ export default function ManagerDashboard() {
                     <AreaChart data={revenueTrend}>
                       <defs>
                         <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                       <XAxis dataKey="time" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
                       <YAxis stroke="#666" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
                         itemStyle={{ color: '#10b981' }}
                       />
@@ -453,7 +453,7 @@ export default function ManagerDashboard() {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
                       />
                     </PieChart>
@@ -516,7 +516,7 @@ export default function ManagerDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>
               {orders.map(order => (
-                <motion.div 
+                <motion.div
                   key={order.id}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -546,7 +546,7 @@ export default function ManagerDashboard() {
 
                   <div className="flex gap-2">
                     {order.status === 'pending' && (
-                      <button 
+                      <button
                         onClick={() => updateOrderStatus(order.id, 'cooking')}
                         className="flex-grow bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-2"
                       >
@@ -554,7 +554,7 @@ export default function ManagerDashboard() {
                       </button>
                     )}
                     {order.status === 'cooking' && (
-                      <button 
+                      <button
                         onClick={() => updateOrderStatus(order.id, 'served')}
                         className="flex-grow bg-green-600 hover:bg-green-500 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-2"
                       >
@@ -574,14 +574,14 @@ export default function ManagerDashboard() {
                 <p className="text-[10px] uppercase tracking-widest text-white/40 mt-1">Generate table-specific menu links</p>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(tableId => {
                 const url = `${window.location.origin}/menu?table=${tableId}`;
                 return (
                   <div key={tableId} className="bg-[#111] border border-white/5 p-8 rounded-3xl flex flex-col items-center space-y-6">
                     <div className="bg-white p-4 rounded-2xl shadow-2xl shadow-white/5">
-                      <QRCodeCanvas 
+                      <QRCodeCanvas
                         id={`qr-table-${tableId}`}
                         value={url}
                         size={160}
@@ -593,7 +593,7 @@ export default function ManagerDashboard() {
                       <h3 className="text-xl font-bold">Table {tableId}</h3>
                       <p className="text-[10px] text-white/40 break-all mt-2 max-w-[200px] mx-auto">{url}</p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => {
                         const canvas = document.getElementById(`qr-table-${tableId}`) as HTMLCanvasElement;
                         if (canvas) {
@@ -622,16 +622,16 @@ export default function ManagerDashboard() {
                 </p>
               </div>
               <div className="flex gap-4">
-                <button 
+                <button
                   disabled={isTestingWrite}
                   onClick={async () => {
                     setIsTestingWrite(true);
                     try {
                       const testRef = collection(db, 'test_connection');
-                      await addDoc(testRef, { 
-                        test: true, 
+                      await addDoc(testRef, {
+                        test: true,
                         time: new Date().toISOString(),
-                        user: user?.email 
+                        user: user?.email
                       });
                       alert('Database write test successful!');
                     } catch (err: any) {
@@ -645,13 +645,13 @@ export default function ManagerDashboard() {
                 >
                   {isTestingWrite ? 'Testing...' : 'Test Write'}
                 </button>
-                <button 
+                <button
                   onClick={handleSeedData}
                   className="border border-white/10 text-white/60 px-6 py-2 rounded-full font-bold text-sm hover:text-white transition-colors"
                 >
                   Seed Sample Data
                 </button>
-                <button 
+                <button
                   onClick={() => setIsAddingDish(true)}
                   className="bg-white text-black px-6 py-2 rounded-full font-bold text-sm flex items-center gap-2"
                 >
@@ -687,7 +687,7 @@ export default function ManagerDashboard() {
         {isAddingDish && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsAddingDish(false)} />
-            <motion.form 
+            <motion.form
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -695,33 +695,33 @@ export default function ManagerDashboard() {
               className="relative w-full max-w-lg bg-[#111] border border-white/10 rounded-3xl p-8 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar"
             >
               <h3 className="text-xl font-serif italic mb-4">{editingId ? 'Edit Menu Item' : 'New Menu Item'}</h3>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">Dish Name</label>
-                  <input 
+                  <input
                     required
                     value={newDish.name}
-                    onChange={e => setNewDish({...newDish, name: e.target.value})}
+                    onChange={e => setNewDish({ ...newDish, name: e.target.value })}
                     className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">Price (₹)</label>
-                  <input 
+                  <input
                     required
                     type="number"
                     step="0.01"
                     value={newDish.price}
-                    onChange={e => setNewDish({...newDish, price: e.target.value})}
+                    onChange={e => setNewDish({ ...newDish, price: e.target.value })}
                     className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">Category</label>
-                  <select 
+                  <select
                     value={newDish.category}
-                    onChange={e => setNewDish({...newDish, category: e.target.value as Category})}
+                    onChange={e => setNewDish({ ...newDish, category: e.target.value as Category })}
                     className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
                   >
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -730,9 +730,9 @@ export default function ManagerDashboard() {
                 {newDish.category === 'Drinks' && (
                   <div>
                     <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">Subcategory</label>
-                    <select 
+                    <select
                       value={newDish.subcategory}
-                      onChange={e => setNewDish({...newDish, subcategory: e.target.value})}
+                      onChange={e => setNewDish({ ...newDish, subcategory: e.target.value })}
                       className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
                     >
                       <option value="">None</option>
@@ -740,12 +740,29 @@ export default function ManagerDashboard() {
                     </select>
                   </div>
                 )}
+                {newDish.category === 'Snacks' && (
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">
+                      Subcategory
+                    </label>
+                    <select
+                      value={newDish.subcategory}
+                      onChange={e => setNewDish({ ...newDish, subcategory: e.target.value })}
+                      className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
+                    >
+                      <option value="">None</option>
+                      {SNACKS_SUBCATEGORIES.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 {newDish.category === 'Classic Food Menu' && (
                   <div>
                     <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">Subcategory</label>
-                    <select 
+                    <select
                       value={newDish.subcategory}
-                      onChange={e => setNewDish({...newDish, subcategory: e.target.value})}
+                      onChange={e => setNewDish({ ...newDish, subcategory: e.target.value })}
                       className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
                     >
                       <option value="">None</option>
@@ -757,19 +774,19 @@ export default function ManagerDashboard() {
 
               <div>
                 <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">Ingredients</label>
-                <textarea 
+                <textarea
                   value={newDish.ingredients}
-                  onChange={e => setNewDish({...newDish, ingredients: e.target.value})}
+                  onChange={e => setNewDish({ ...newDish, ingredients: e.target.value })}
                   className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm h-20"
                 />
               </div>
 
               <div>
                 <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">Pairing Tag (Flavor Profile)</label>
-                <input 
+                <input
                   placeholder="e.g. Spicy, Umami, Citrusy"
                   value={newDish.pairing_tag}
-                  onChange={e => setNewDish({...newDish, pairing_tag: e.target.value})}
+                  onChange={e => setNewDish({ ...newDish, pairing_tag: e.target.value })}
                   className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
                 />
               </div>
@@ -778,7 +795,7 @@ export default function ManagerDashboard() {
                 <label className="block text-[10px] uppercase tracking-widest text-white/40 mb-1">Dish Image</label>
                 <div className="flex gap-4 items-center">
                   <div className="flex-grow">
-                    <input 
+                    <input
                       type="file"
                       accept="image/*"
                       onChange={handleImageUpload}
@@ -786,7 +803,7 @@ export default function ManagerDashboard() {
                       id="dish-image-upload"
                       disabled={isUploading}
                     />
-                    <label 
+                    <label
                       htmlFor="dish-image-upload"
                       className={`flex items-center justify-center gap-2 w-full bg-white/5 border border-white/10 border-dashed rounded-lg px-4 py-3 text-sm transition-colors ${isUploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-white/10'}`}
                     >
@@ -801,17 +818,17 @@ export default function ManagerDashboard() {
                   {newDish.imageUrl && (
                     <div className="relative group">
                       <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center">
-                        <img 
-                          src={newDish.imageUrl} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover" 
+                        <img
+                          src={newDish.imageUrl}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/broken/200/200';
                           }}
                         />
                       </div>
-                      <button 
+                      <button
                         type="button"
                         onClick={() => setNewDish(prev => ({ ...prev, imageUrl: '' }))}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -825,8 +842,8 @@ export default function ManagerDashboard() {
                   <div className="flex justify-between items-center mb-1">
                     <p className="text-[10px] text-white/20">Or paste Image URL</p>
                     {isUploading && (
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => setIsUploading(false)}
                         className="text-[10px] text-red-500 hover:underline"
                       >
@@ -834,10 +851,10 @@ export default function ManagerDashboard() {
                       </button>
                     )}
                   </div>
-                  <input 
+                  <input
                     value={newDish.imageUrl}
                     onChange={e => {
-                      setNewDish({...newDish, imageUrl: e.target.value});
+                      setNewDish({ ...newDish, imageUrl: e.target.value });
                       if (isUploading) setIsUploading(false);
                     }}
                     className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm"
@@ -852,8 +869,8 @@ export default function ManagerDashboard() {
                   setEditingId(null);
                   setNewDish({ name: '', price: '', ingredients: '', category: CATEGORIES[0], subcategory: '', pairing_tag: '', imageUrl: '' });
                 }} className="flex-grow border border-white/10 py-3 rounded-xl text-sm">Cancel</button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isUploading || isSaving}
                   className="flex-grow bg-white text-black font-bold py-3 rounded-xl text-sm disabled:opacity-50"
                 >
@@ -870,7 +887,7 @@ export default function ManagerDashboard() {
         {dishToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setDishToDelete(null)} />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -881,15 +898,15 @@ export default function ManagerDashboard() {
               </div>
               <h3 className="text-xl font-bold mb-2">Delete Dish?</h3>
               <p className="text-white/40 text-sm mb-6">This action cannot be undone. Are you sure you want to remove this item from the menu?</p>
-              
+
               <div className="flex gap-3">
-                <button 
+                <button
                   onClick={() => setDishToDelete(null)}
                   className="flex-1 px-6 py-3 rounded-xl border border-white/10 font-bold text-sm hover:bg-white/5 transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={confirmDelete}
                   className="flex-1 px-6 py-3 rounded-xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors"
                 >

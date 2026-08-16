@@ -1,4 +1,4 @@
-﻿# Digital Menu Project
+﻿# AI-Enhanced QR Menu & Restaurant Management System
 
 A QR-based digital menu and restaurant management system.
 
